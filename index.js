@@ -1,26 +1,26 @@
 import express from 'express';
 import cors from "cors";
-import admin from 'firebase-admin';
-import serviceAccount from './serviceAccountKey.json'; // Path to your Firebase service account key JSON file
+import blogPostRoutes from './routes/blogPostRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import { verifyToken } from './middleware/authMiddleware.js';
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from "firebase/firestore";
+import firebaseConfig from "./config.js"; 
 
-// Initialize Firebase Admin SDK
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+import dotenv from 'dotenv';
+dotenv.config();
 
-const db = admin.firestore();
+const appp = initializeApp(firebaseConfig);
+const db = getFirestore(appp);
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const port = process.env.PORT || 3000;
+const port = 3000;
 
-// Routes
-import blogPostRoutes from './routes/blogPostRoutes';
-import userRoutes from './routes/userRoutes';
 
-app.use('/api/posts', blogPostRoutes);
+app.use('/api/posts', verifyToken, blogPostRoutes);
 app.use('/api/users', userRoutes);
 
 // Error handling middleware

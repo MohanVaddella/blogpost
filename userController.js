@@ -1,5 +1,12 @@
 // userController.js
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import jwt from 'jsonwebtoken';
+
+import dotenv from 'dotenv';
+dotenv.config();
+
+const { JWT_SECRET } = process.env;
+
 
 export const registerUser = async (req, res) => {
     const { email, password } = req.body;
@@ -19,8 +26,16 @@ export const loginUser = async (req, res) => {
     try {
         const auth = getAuth();
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const token = await userCredential.user.getIdToken();
-        res.status(200).json({ token });
+        const token = jwt.sign({
+            userId: userCredential.user.uid,
+            email: userCredential.user.email
+        }, JWT_SECRET, { expiresIn: "1h" });
+        
+        res.status(200).json({
+            msg: "Login Successful...!",
+            email: userCredential.user.email,
+            token
+        });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

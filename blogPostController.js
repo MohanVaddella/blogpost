@@ -1,11 +1,14 @@
-import { firestore } from 'firebase-admin';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, addDoc, getDocs, getDoc, deleteDoc, updateDoc } from "firebase/firestore";
+import firebaseConfig from "./config.js"; 
 
-const db = firestore();
-const postsCollection = db.collection('posts');
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const postsCollection = collection(db, 'posts');
 
 export const getAllPosts = async (req, res) => {
     try {
-        const snapshot = await postsCollection.get();
+        const snapshot = await getDocs(postsCollection);
         const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         res.status(200).json(posts);
     } catch (error) {
@@ -17,8 +20,8 @@ export const getPostById = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const doc = await postsCollection.doc(id).get();
-        if (!doc.exists) {
+        const doc = await getDoc(postsCollection, id);
+        if (!doc.exists()) {
             res.status(404).json({ error: 'Post not found' });
         } else {
             res.status(200).json({ id: doc.id, ...doc.data() });
@@ -32,7 +35,7 @@ export const createPost = async (req, res) => {
     const { title, content, author } = req.body;
 
     try {
-        const docRef = await postsCollection.add({ title, content, author, createdAt: new Date() });
+        const docRef = await addDoc(postsCollection, { title, content, author, createdAt: new Date() });
         res.status(201).json({ id: docRef.id });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -43,7 +46,7 @@ export const deletePost = async (req, res) => {
     const { id } = req.params;
 
     try {
-        await postsCollection.doc(id).delete();
+        await deleteDoc(postsCollection, id);
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -55,7 +58,7 @@ export const updatePost = async (req, res) => {
     const { title, content, author } = req.body;
 
     try {
-        await postsCollection.doc(id).update({ title, content, author });
+        await updateDoc(postsCollection, id, { title, content, author });
         res.status(200).json({ message: 'Post updated successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -74,7 +77,7 @@ export const getFilteredPosts = async (req, res) => {
     }
 
     try {
-        const snapshot = await query.get();
+        const snapshot = await getDocs(query);
         const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         res.status(200).json(posts);
     } catch (error) {
