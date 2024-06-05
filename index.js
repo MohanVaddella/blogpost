@@ -3,15 +3,9 @@ import cors from "cors";
 import blogPostRoutes from './routes/blogPostRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import { verifyToken } from './middleware/authMiddleware.js';
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from "firebase/firestore";
-import firebaseConfig from "./config.js"; 
 
 import dotenv from 'dotenv';
 dotenv.config();
-
-//const appp = initializeApp(firebaseConfig);
-//const db = getFirestore(appp);
 
 const app = express();
 app.use(express.json());

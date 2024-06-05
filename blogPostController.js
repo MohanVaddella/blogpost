@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, getDoc, deleteDoc, updateDoc } from "firebase/firestore";
 import firebaseConfig from "./config.js"; 
+import upload from './middleware/uploadMiddleware.js';
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -32,14 +33,27 @@ export const getPostById = async (req, res) => {
 };
 
 export const createPost = async (req, res) => {
-    const { title, content, author } = req.body;
+    upload.single('image')(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
 
-    try {
-        const docRef = await addDoc(postsCollection, { title, content, author, createdAt: new Date() });
-        res.status(201).json({ id: docRef.id });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+        const { title, content, author } = req.body;
+        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null; // Image URL
+
+        try {
+            const docRef = await addDoc(postsCollection, {
+                title,
+                content,
+                author,
+                imageUrl,
+                createdAt: new Date()
+            });
+            res.status(201).json({ id: docRef.id });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
 };
 
 export const deletePost = async (req, res) => {
