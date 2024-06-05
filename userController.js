@@ -1,4 +1,3 @@
-// userController.js
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import jwt from 'jsonwebtoken';
 
