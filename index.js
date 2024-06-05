@@ -10,8 +10,8 @@ import firebaseConfig from "./config.js";
 import dotenv from 'dotenv';
 dotenv.config();
 
-const appp = initializeApp(firebaseConfig);
-const db = getFirestore(appp);
+//const appp = initializeApp(firebaseConfig);
+//const db = getFirestore(appp);
 
 const app = express();
 app.use(express.json());
