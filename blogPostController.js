@@ -39,6 +39,7 @@ export const createPost = async (req, res) => {
         }
 
         const { title, content, author } = req.body;
+        console.log('Received request to post a blog:', req.body);
         const imageUrl = req.file ? `/uploads/${req.file.filename}` : null; // Image URL
 
         try {
